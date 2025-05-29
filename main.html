@@ -246,6 +246,13 @@
       margin-top: 0.5rem;
       display: none;
     }
+
+    .shortcut-hint {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -257,6 +264,7 @@
         <option value="SHA-256">SHA-256 Hash Generator</option>
         <option value="SHA-384">SHA-384 Hash Generator</option>
         <option value="SHA-512">SHA-512 Hash Generator</option>
+        <option value="SHA-1">SHA-1 Hash Generator</option>
       </select>
     </h1>
     <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
@@ -267,7 +275,7 @@
     </div>
     <div class="progress-text" id="progressText"></div>
     <div class="output" id="hashOutput"></div>
-    <div class="drag-hint">Drag and drop a file here to generate its hash</div>
+    <div class="drag-hint">Drag and drop a file here to generate its hash. There no file size limit. The only limitation is your computer.</div>
   </div>
 
   <script>
@@ -284,24 +292,28 @@
         return;
       }
 
-      // Encode text as UTF-8
-      const encoder = new TextEncoder();
-      const data = encoder.encode(text);
+      try {
+        // Encode text as UTF-8
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
 
-      // Generate hash using selected algorithm
-      const hashBuffer = await crypto.subtle.digest(currentAlgorithm, data);
+        // Generate hash using selected algorithm
+        const hashBuffer = await crypto.subtle.digest(currentAlgorithm, data);
 
-      // Convert ArrayBuffer to hex string
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // Convert ArrayBuffer to hex string
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-      // Display the result with animation
-      const output = document.getElementById('hashOutput');
-      output.style.opacity = '0';
-      setTimeout(() => {
-        output.textContent = hashHex;
-        output.style.opacity = '1';
-      }, 200);
+        // Display the result with animation
+        const output = document.getElementById('hashOutput');
+        output.style.opacity = '0';
+        setTimeout(() => {
+          output.textContent = hashHex;
+          output.style.opacity = '1';
+        }, 200);
+      } catch (error) {
+        document.getElementById('hashOutput').textContent = 'Error: ' + error.message;
+      }
     }
 
     // Add keyboard shortcut listener
@@ -390,28 +402,32 @@
       const chunks = Math.ceil(file.size / chunkSize);
       let processed = 0;
       
-      const hashBuffer = await crypto.subtle.digest(currentAlgorithm, new Uint8Array(0));
-      let hashArray = new Uint8Array(hashBuffer);
+      try {
+        const hashBuffer = await crypto.subtle.digest(currentAlgorithm, new Uint8Array(0));
+        let hashArray = new Uint8Array(hashBuffer);
 
-      for (let i = 0; i < chunks; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, file.size);
-        const chunk = file.slice(start, end);
-        
-        const arrayBuffer = await readChunk(chunk);
-        const newHashBuffer = await crypto.subtle.digest(currentAlgorithm, arrayBuffer);
-        const newHashArray = new Uint8Array(newHashBuffer);
-        
-        // Combine hashes
-        hashArray = combineHashes(hashArray, newHashArray);
-        
-        processed++;
-        progressCallback(processed / chunks);
+        for (let i = 0; i < chunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+          const chunk = file.slice(start, end);
+          
+          const arrayBuffer = await readChunk(chunk);
+          const newHashBuffer = await crypto.subtle.digest(currentAlgorithm, arrayBuffer);
+          const newHashArray = new Uint8Array(newHashBuffer);
+          
+          // Combine hashes
+          hashArray = combineHashes(hashArray, newHashArray);
+          
+          processed++;
+          progressCallback(processed / chunks);
+        }
+
+        return Array.from(hashArray)
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+      } catch (error) {
+        throw new Error('Failed to generate hash: ' + error.message);
       }
-
-      return Array.from(hashArray)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
     }
 
     function readChunk(chunk) {
