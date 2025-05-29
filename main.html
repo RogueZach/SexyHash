@@ -190,6 +190,31 @@
         transform: translateY(0px);
       }
     }
+
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 1rem 0;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+      margin-top: 0.5rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -200,6 +225,10 @@
     <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
     <textarea id="inputText" placeholder="Type your text here..."></textarea>
     <button onclick="generateHash()">Generate Hash</button>
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText"></div>
     <div class="output" id="hashOutput"></div>
     <div class="drag-hint">Drag and drop a file here to generate its hash</div>
   </div>
@@ -280,24 +309,83 @@
 
       if (files.length > 0) {
         const file = files[0];
-        const reader = new FileReader();
-        
-        reader.onload = async function(e) {
-          const arrayBuffer = e.target.result;
-          const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const output = document.getElementById('hashOutput');
+
+        // Show progress elements
+        progressContainer.style.display = 'block';
+        progressText.style.display = 'block';
+        output.style.opacity = '0';
+
+        try {
+          const hash = await hashFile(file, (progress) => {
+            const percent = Math.round(progress * 100);
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `Hashing: ${percent}%`;
+          });
+
+          // Hide progress elements
+          progressContainer.style.display = 'none';
+          progressText.style.display = 'none';
           
-          const output = document.getElementById('hashOutput');
-          output.style.opacity = '0';
-          setTimeout(() => {
-            output.textContent = hashHex;
-            output.style.opacity = '1';
-          }, 200);
-        };
-        
-        reader.readAsArrayBuffer(file);
+          // Show result
+          output.textContent = hash;
+          output.style.opacity = '1';
+        } catch (error) {
+          output.textContent = 'Error: ' + error.message;
+          output.style.opacity = '1';
+          progressContainer.style.display = 'none';
+          progressText.style.display = 'none';
+        }
       }
+    }
+
+    async function hashFile(file, progressCallback) {
+      const chunkSize = 1024 * 1024; // 1MB chunks
+      const chunks = Math.ceil(file.size / chunkSize);
+      let processed = 0;
+      
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new Uint8Array(0));
+      let hashArray = new Uint8Array(hashBuffer);
+
+      for (let i = 0; i < chunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+        
+        const arrayBuffer = await readChunk(chunk);
+        const newHashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const newHashArray = new Uint8Array(newHashBuffer);
+        
+        // Combine hashes
+        hashArray = combineHashes(hashArray, newHashArray);
+        
+        processed++;
+        progressCallback(processed / chunks);
+      }
+
+      return Array.from(hashArray)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function readChunk(chunk) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsArrayBuffer(chunk);
+      });
+    }
+
+    function combineHashes(hash1, hash2) {
+      const combined = new Uint8Array(hash1.length);
+      for (let i = 0; i < hash1.length; i++) {
+        combined[i] = hash1[i] ^ hash2[i];
+      }
+      return combined;
     }
   </script>
 </body>
