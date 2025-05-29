@@ -76,13 +76,44 @@
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .hash-selector {
+      background: transparent;
+      border: none;
+      font-size: 2.5rem;
+      color: #2c3e50;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0.8rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
       background: linear-gradient(45deg, #2c3e50, #3498db);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: fadeIn 1s ease-out;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .hash-selector:hover {
+      transform: translateY(-3px);
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .hash-selector:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+    }
+
+    .hash-selector option {
+      background: white;
+      color: #2c3e50;
+      font-size: 1.2rem;
+      padding: 1rem;
     }
 
     input, textarea, button {
@@ -221,7 +252,13 @@
   <div class="main-title">>s3xy_hash< (under construction)</div>
   <div class="sub-text">"Why are the popular, web-based solutions ugly and have complicated backends?"</div>
   <div class="container" id="dropZone">
-    <h1>SHA-256 Hash Generator</h1>
+    <h1>
+      <select class="hash-selector" id="hashAlgorithm" onchange="updateHashAlgorithm()">
+        <option value="SHA-256">SHA-256 Hash Generator</option>
+        <option value="SHA-384">SHA-384 Hash Generator</option>
+        <option value="SHA-512">SHA-512 Hash Generator</option>
+      </select>
+    </h1>
     <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
     <textarea id="inputText" placeholder="Type your text here..."></textarea>
     <button onclick="generateHash()">Generate Hash</button>
@@ -234,6 +271,12 @@
   </div>
 
   <script>
+    let currentAlgorithm = 'SHA-256';
+
+    function updateHashAlgorithm() {
+      currentAlgorithm = document.getElementById('hashAlgorithm').value;
+    }
+
     async function generateHash() {
       const text = document.getElementById('inputText').value;
       if (!text) {
@@ -245,8 +288,8 @@
       const encoder = new TextEncoder();
       const data = encoder.encode(text);
 
-      // Generate SHA-256 hash
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      // Generate hash using selected algorithm
+      const hashBuffer = await crypto.subtle.digest(currentAlgorithm, data);
 
       // Convert ArrayBuffer to hex string
       const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -347,7 +390,7 @@
       const chunks = Math.ceil(file.size / chunkSize);
       let processed = 0;
       
-      const hashBuffer = await crypto.subtle.digest('SHA-256', new Uint8Array(0));
+      const hashBuffer = await crypto.subtle.digest(currentAlgorithm, new Uint8Array(0));
       let hashArray = new Uint8Array(hashBuffer);
 
       for (let i = 0; i < chunks; i++) {
@@ -356,7 +399,7 @@
         const chunk = file.slice(start, end);
         
         const arrayBuffer = await readChunk(chunk);
-        const newHashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const newHashBuffer = await crypto.subtle.digest(currentAlgorithm, arrayBuffer);
         const newHashArray = new Uint8Array(newHashBuffer);
         
         // Combine hashes
