@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hash Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    .output {
+      margin-top: 20px;
+      word-break: break-all;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>SHA-256 Hash Generator</h1>
+  <textarea id="inputText" placeholder="Type your text here..."></textarea>
+  <button onclick="generateHash()">Generate Hash</button>
+  <div class="output" id="hashOutput"></div>
+
+  <script>
+    async function generateHash() {
+      const text = document.getElementById('inputText').value;
+      if (!text) {
+        document.getElementById('hashOutput').textContent = 'Please enter some text.';
+        return;
+      }
+
+      // Encode text as UTF-8
+      const encoder = new TextEncoder();
+      const data = encoder.encode(text);
+
+      // Generate SHA-256 hash
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+      // Convert ArrayBuffer to hex string
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Display the result
+      document.getElementById('hashOutput').textContent = hashHex;
+    }
+  </script>
+</body>
+</html>
