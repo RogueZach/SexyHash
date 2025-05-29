@@ -346,40 +346,27 @@
       const chunkSize = 1024 * 1024; // 1MB chunks
       const chunks = Math.ceil(file.size / chunkSize);
       let processed = 0;
-
-      // Create a new SubtleCrypto instance
-      const crypto = window.crypto.subtle;
       
-      // Initialize the hash
-      const hashBuffer = await crypto.digest('SHA-256', new Uint8Array(0));
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new Uint8Array(0));
       let hashArray = new Uint8Array(hashBuffer);
 
-      // Create a buffer to store the entire file content
-      const fileBuffer = new Uint8Array(file.size);
-      let offset = 0;
-
-      // Read the file in chunks
       for (let i = 0; i < chunks; i++) {
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, file.size);
         const chunk = file.slice(start, end);
         
         const arrayBuffer = await readChunk(chunk);
-        const chunkArray = new Uint8Array(arrayBuffer);
+        const newHashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const newHashArray = new Uint8Array(newHashBuffer);
         
-        // Copy chunk into the file buffer
-        fileBuffer.set(chunkArray, offset);
-        offset += chunkArray.length;
+        // Combine hashes
+        hashArray = combineHashes(hashArray, newHashArray);
         
         processed++;
         progressCallback(processed / chunks);
       }
 
-      // Hash the entire file at once
-      const finalHashBuffer = await crypto.digest('SHA-256', fileBuffer);
-      const finalHashArray = new Uint8Array(finalHashBuffer);
-
-      return Array.from(finalHashArray)
+      return Array.from(hashArray)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
     }
@@ -391,6 +378,14 @@
         reader.onerror = (e) => reject(e);
         reader.readAsArrayBuffer(chunk);
       });
+    }
+
+    function combineHashes(hash1, hash2) {
+      const combined = new Uint8Array(hash1.length);
+      for (let i = 0; i < hash1.length; i++) {
+        combined[i] = hash1[i] ^ hash2[i];
+      }
+      return combined;
     }
   </script>
 </body>
