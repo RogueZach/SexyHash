@@ -22,25 +22,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
 
     .main-title {
       font-size: 2.5rem;
+      margin-top: 2rem;
       margin-bottom: 0.5rem;
       background: linear-gradient(45deg, #2c3e50, #3498db);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: fadeIn 1s ease-out;
+      animation: fadeIn 3s ease-out;
       text-align: center;
+      white-space: nowrap;
     }
 
     .sub-text {
       font-size: 0.8rem;
       color: #666;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       text-align: center;
+      animation: pulse 2s ease-in-out infinite;
+      animation-delay: 3s;
     }
 
     .container {
@@ -54,6 +57,17 @@
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
       animation: slideUp 0.8s ease-out;
       box-sizing: border-box;
+      margin-top: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(45deg, #2c3e50, #3498db);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeIn 1s ease-out;
     }
 
     input, textarea, button {
@@ -130,6 +144,21 @@
       }
     }
 
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+    }
+
     /* Add subtle floating animation to the container */
     .container {
       animation: float 6s ease-in-out infinite;
@@ -150,7 +179,7 @@
 </head>
 <body>
   <div class="main-title">SexyHash</div>
-  <div class="sub-text">123 123 123</div>
+  <div class="sub-text">by: z8chy</div>
   <div class="container">
     <h1>SHA-256 Hash Generator</h1>
     <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
