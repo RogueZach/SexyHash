@@ -27,7 +27,7 @@
 
     h1 {
       font-size: 2.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 0.5rem;
       background: linear-gradient(45deg, #2c3e50, #3498db);
       -webkit-background-clip: text;
       background-clip: text;
@@ -35,8 +35,16 @@
       animation: fadeIn 1s ease-out;
     }
 
+    .shortcut-hint {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
     .container {
       width: 100%;
+      max-width: 800px;
       background: var(--glass-bg);
       backdrop-filter: blur(10px);
       border: 1px solid var(--glass-border);
@@ -44,6 +52,7 @@
       padding: 2rem;
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
       animation: slideUp 0.8s ease-out;
+      box-sizing: border-box;
     }
 
     input, textarea, button {
@@ -55,6 +64,7 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.9);
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
 
     textarea {
@@ -140,6 +150,7 @@
 <body>
   <div class="container">
     <h1>SHA-256 Hash Generator</h1>
+    <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
     <textarea id="inputText" placeholder="Type your text here..."></textarea>
     <button onclick="generateHash()">Generate Hash</button>
     <div class="output" id="hashOutput"></div>
@@ -172,6 +183,13 @@
         output.style.opacity = '1';
       }, 200);
     }
+
+    // Add keyboard shortcut listener
+    document.getElementById('inputText').addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        generateHash();
+      }
+    });
   </script>
 </body>
 </html>
