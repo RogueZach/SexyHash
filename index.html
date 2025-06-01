@@ -1,336 +1,340 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hash Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SexyHash - Modern Hash Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #ffffff 0%, #ffe0f0 30%, #e0ffe0 60%, #f0f4f8 100%);
-      --glass-bg: rgba(255, 255, 255, 0.5);
-      --glass-border: rgba(255, 255, 255, 0.3);
+    /* Custom scrollbar for a more polished look - optional but trendy */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      min-height: 100vh;
-      background: var(--primary-gradient);
-      color: #2c3e50;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    ::-webkit-scrollbar-track {
+      background: #1e293b; /* slate-800 */
     }
-
-    .main-title {
-      font-size: 2.5rem;
-      margin-top: 2rem;
-      margin-bottom: 0.5rem;
-      color: #1a202c;
-      font-weight: bold;
-      -webkit-background-clip: initial;
-      background-clip: initial;
-      -webkit-text-fill-color: initial;
-      animation: fadeIn 3s ease-out;
-      text-align: center;
-      white-space: nowrap;
+    ::-webkit-scrollbar-thumb {
+      background: #38bdf8; /* sky-500 */
+      border-radius: 4px;
     }
-
-    .sub-text {
-      font-size: 0.8rem;
-      color: #718096;
-      margin-bottom: 1rem;
-      text-align: center;
-      animation: none;
-      opacity: 0.7;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0ea5e9; /* sky-600 */
     }
-
-    .container {
-      width: 100%;
-      max-width: 800px;
-      background: #ffffff;
-      backdrop-filter: none;
-      border: 1px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      animation: slideUp 0.8s ease-out;
-      box-sizing: border-box;
-      margin-top: 1rem;
-      transition: all 0.3s ease;
+    /* Custom selection color */
+    ::selection {
+      background-color: #38bdf8; /* sky-500 */
+      color: #ffffff;
     }
-
-    .container.drag-over {
-      background: rgba(255, 255, 255, 0.8);
-      border: 2px dashed #a0aec0;
-      transform: scale(1.01);
-    }
-
-    .drag-hint {
-      font-size: 0.9rem;
-      color: #718096;
-      text-align: center;
-      margin-top: 1rem;
-      opacity: 0.8;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .hash-selector {
-      background: transparent;
-      border: none;
-      font-size: 2.5rem;
-      color: #1a202c;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 0.8rem;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      -webkit-background-clip: initial;
-      background-clip: initial;
-      -webkit-text-fill-color: initial;
-      letter-spacing: 0.5px;
-      text-shadow: none;
-    }
-
-    .hash-selector:hover {
-      transform: translateY(-3px);
-      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .hash-selector:focus {
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
-    }
-
-    .hash-selector option {
-      background: white;
-      color: #2c3e50;
-      font-size: 1.2rem;
-      padding: 1rem;
-    }
-
-    input, textarea, button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 15px;
-      font-size: 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background: #f8f9fa;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-    }
-
-    textarea {
-      height: 120px;
-      resize: vertical;
-    }
-
-    textarea:focus, input:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
-      transform: translateY(-2px);
-    }
-
-    button {
-      background: linear-gradient(45deg, #3498db, #2980b9);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    .output {
-      margin-top: 25px;
-      word-break: break-all;
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      font-family: 'SF Mono', 'Menlo', monospace;
-      font-size: 0.9rem;
-      border: 1px solid #e2e8f0;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        opacity: 0.6;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.05);
-      }
-      100% {
-        opacity: 0.6;
-        transform: scale(1);
-      }
-    }
-
-    .progress-container {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      margin: 1rem 0;
-      overflow: hidden;
-      display: none;
-    }
-
-    .progress-bar {
-      width: 0%;
-      height: 100%;
-      background: #a0aec0;
-      transition: width 0.3s ease;
-    }
-
-    .progress-text {
-      font-size: 0.8rem;
-      color: #718096;
-      text-align: center;
-      margin-top: 0.5rem;
-      display: none;
-    }
-
-    .shortcut-hint {
-      font-size: 0.8rem;
-      color: #718096;
-      margin-bottom: 1rem;
-      text-align: center;
+    /* For Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #38bdf8 #1e293b;
     }
   </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // or 'media'
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Roboto Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#38bdf8', // sky-500
+              light: '#7dd3fc',   // sky-400
+              dark: '#0ea5e9',    // sky-600
+            },
+            secondary: {
+              DEFAULT: '#8b5cf6', // violet-500
+              light: '#a78bfa',   // violet-400
+              dark: '#7c3aed',    // violet-600
+            },
+            neutral: {
+              950: '#0c111c', // Custom darker slate
+              900: '#111827', // gray-900
+              800: '#1f2937', // gray-800
+              700: '#374151', // gray-700
+              600: '#4b5563', // gray-600
+              300: '#d1d5db', // gray-300
+              200: '#e5e7eb', // gray-200
+              100: '#f3f4f6', // gray-100
+            }
+          },
+          animation: {
+            fadeInDown: 'fadeInDown 0.7s ease-out',
+            fadeInUp: 'fadeInUp 0.7s ease-out',
+            slideUp: 'slideUp 0.7s cubic-bezier(0.165, 0.84, 0.44, 1)',
+            pulseSlow: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeInDown: {
+              '0%': { opacity: '0', transform: 'translateY(-20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          // For glassmorphism attempt if needed (backdrop-filter requires JIT or custom CSS)
+          // backdropBlur: {
+          //   'xs': '2px',
+          // }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <div class="main-title">SexyHash</div>
-  <div class="sub-text">"Why are the popular, web-based solutions ugly, cluttered with ads, and have complicated backends?"</div>
-  <div class="container" id="dropZone">
-    <h1>
-      <select class="hash-selector" id="hashAlgorithm" onchange="updateHashAlgorithm()">
-        <option value="SHA-256">SHA-256 Hash Generator</option>
-        <option value="SHA-384">SHA-384 Hash Generator</option>
-        <option value="SHA-512">SHA-512 Hash Generator</option>
-        <option value="SHA-1">SHA-1 Hash Generator</option>
-        <option value="SHA-224">SHA-224 Hash Generator</option>
-        <option value="SHA3-224">SHA3-224 Hash Generator</option>
-        <option value="SHA3-256">SHA3-256 Hash Generator</option>
-        <option value="SHA3-384">SHA3-384 Hash Generator</option>
-        <option value="SHA3-512">SHA3-512 Hash Generator</option>
-        <option value="BLAKE2b-256">BLAKE2b-256 Hash Generator</option>
-        <option value="BLAKE2b-384">BLAKE2b-384 Hash Generator</option>
-        <option value="BLAKE2b-512">BLAKE2b-512 Hash Generator</option>
-      </select>
-    </h1>
-    <div class="shortcut-hint">Press Ctrl + Enter to generate hash</div>
-    <textarea id="inputText" placeholder="Type your text here..."></textarea>
-    <button onclick="generateHash()">Generate Hash</button>
-    <div class="progress-container" id="progressContainer">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div class="progress-text" id="progressText"></div>
-    <div class="output" id="hashOutput"></div>
-    <div class="drag-hint">Drag and drop a file here to generate its hash. There no file size limit. The only limitation is your computer.</div>
+<body class="font-sans bg-neutral-950 text-neutral-200 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-primary selection:text-white">
+
+  <div class="w-full max-w-2xl mx-auto">
+    <header class="text-center mb-8 animate-fadeInDown">
+      <h1 class="text-5xl sm:text-6xl font-extrabold">
+        <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          SexyHash
+        </span>
+      </h1>
+      <p class="mt-3 text-base sm:text-lg text-neutral-300 animate-fadeInUp" style="animation-delay: 0.2s;">
+        "No ads, no backend, just pure client-side hashing. Sleek, fast, and secure."
+      </p>
+    </header>
+
+    <main
+      id="dropZone"
+      class="w-full bg-neutral-900/70 backdrop-blur-md border border-neutral-700/50 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 animate-slideUp"
+      style="animation-delay: 0.4s;"
+    >
+      <div class="relative">
+        <label for="hashAlgorithm" class="sr-only">Select Hash Algorithm</label>
+        <select
+          id="hashAlgorithm"
+          onchange="updateHashAlgorithm()"
+          class="w-full appearance-none bg-neutral-800 border border-neutral-700 text-neutral-100 text-lg font-semibold py-3 px-4 pr-10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-150 ease-in-out cursor-pointer"
+        >
+          <option value="SHA-256">SHA-256</option>
+          <option value="SHA-384">SHA-384</option>
+          <option value="SHA-512">SHA-512</option>
+          <option value="SHA-1">SHA-1 (Legacy)</option>
+          <option value="SHA-224">SHA-224</option>
+          <option value="SHA3-224">SHA3-224</option>
+          <option value="SHA3-256">SHA3-256</option>
+          <option value="SHA3-384">SHA3-384</option>
+          <option value="SHA3-512">SHA3-512</option>
+          <option value="BLAKE2b-256">BLAKE2b-256</option>
+          <option value="BLAKE2b-384">BLAKE2b-384</option>
+          <option value="BLAKE2b-512">BLAKE2b-512</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-400">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+
+      <p class="text-xs text-center text-neutral-500">
+        Tip: Press <kbd class="px-1.5 py-0.5 text-xs font-semibold text-neutral-300 bg-neutral-700 border border-neutral-600 rounded-md">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 text-xs font-semibold text-neutral-300 bg-neutral-700 border border-neutral-600 rounded-md">Enter</kbd> (or Cmd) to generate.
+      </p>
+
+      <div>
+        <label for="inputText" class="sr-only">Input Text or Drop File</label>
+        <textarea
+          id="inputText"
+          placeholder="Type text or drop a file here..."
+          class="w-full h-32 sm:h-36 p-3.5 bg-neutral-800/80 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-500 focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-all duration-150 ease-in-out"
+        ></textarea>
+      </div>
+
+      <button
+        onclick="generateHash()"
+        class="w-full py-3.5 px-6 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-950 transition-all duration-150 ease-in-out transform active:scale-95"
+      >
+        Generate Hash
+      </button>
+
+      <div id="progressContainer" class="hidden space-y-1 pt-2">
+        <div class="w-full bg-neutral-700 rounded-full h-2.5">
+          <div id="progressBar" class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+        <p id="progressText" class="text-xs text-center text-neutral-400"></p>
+      </div>
+
+      <div>
+        <label for="hashOutput" class="sr-only">Generated Hash</label>
+        <div
+          id="hashOutput"
+          class="w-full min-h-[80px] p-4 bg-neutral-950 border border-neutral-700 rounded-lg font-mono text-sm text-neutral-400 break-all flex items-center justify-center text-center transition-colors duration-200"
+        >
+          Your hash will appear here...
+        </div>
+         <button id="copyButton" onclick="copyHashToClipboard()" class="hidden mt-3 w-full py-2 px-4 bg-neutral-700 hover:bg-neutral-600 text-neutral-200 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out">
+          Copy Hash
+        </button>
+      </div>
+      
+      <p class="text-xs text-center text-neutral-500 pt-2">
+        Drag & drop any file. Processing is done locally in your browser.
+      </p>
+    </main>
+
+    <footer class="mt-10 mb-6 text-center animate-fadeInUp" style="animation-delay: 0.6s;">
+      <p class="text-xs text-neutral-600">
+        Crafted with <span class="text-red-500">&hearts;</span> in a trendy SF-inspired digital studio.
+      </p>
+    </footer>
   </div>
 
   <script>
     let currentAlgorithm = 'SHA-256';
+    const outputElement = document.getElementById('hashOutput');
+    const inputTextElement = document.getElementById('inputText');
+    const dropZone = document.getElementById('dropZone');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const copyButton = document.getElementById('copyButton');
 
+    // Function to update the selected hash algorithm
     function updateHashAlgorithm() {
       currentAlgorithm = document.getElementById('hashAlgorithm').value;
+      // Optionally, clear output when algorithm changes
+      // outputElement.textContent = 'Your hash will appear here...';
+      // outputElement.classList.remove('text-primary', 'text-red-500');
+      // outputElement.classList.add('text-neutral-400');
+      // copyButton.classList.add('hidden');
     }
 
+    // Function to display messages in the output area
+    function showMessage(message, type = 'info') {
+      outputElement.textContent = message;
+      outputElement.classList.remove('text-primary', 'text-red-500', 'text-neutral-400');
+      copyButton.classList.add('hidden');
+
+      if (type === 'hash') {
+        outputElement.classList.add('text-primary'); // Use primary color for successful hash
+        copyButton.classList.remove('hidden');
+      } else if (type === 'error') {
+        outputElement.classList.add('text-red-500'); // Use red for errors
+      } else {
+        outputElement.classList.add('text-neutral-400'); // Default informational text
+      }
+      outputElement.style.opacity = '1';
+    }
+    
+    // Function to copy hash to clipboard
+    function copyHashToClipboard() {
+        const hashToCopy = outputElement.textContent;
+        if (hashToCopy && !outputElement.classList.contains('text-red-500') && hashToCopy !== 'Your hash will appear here...' && hashToCopy !== 'Please enter some text or drop a file.') {
+            // Using document.execCommand for broader compatibility in iFrames
+            const textarea = document.createElement('textarea');
+            textarea.value = hashToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                // Visual feedback for copy
+                const originalButtonText = copyButton.textContent;
+                copyButton.textContent = 'Copied!';
+                copyButton.classList.add('bg-green-500', 'hover:bg-green-600');
+                setTimeout(() => {
+                    copyButton.textContent = originalButtonText;
+                    copyButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+                }, 1500);
+            } catch (err) {
+                console.error('Failed to copy hash: ', err);
+                // Fallback or error message if needed, though alert() is disallowed.
+                // Could update button text to "Copy Failed" temporarily.
+                copyButton.textContent = 'Copy Failed';
+                 setTimeout(() => {
+                    copyButton.textContent = "Copy Hash";
+                }, 1500);
+            }
+            document.body.removeChild(textarea);
+        }
+    }
+
+
+    // Function to generate hash from text input
     async function generateHash() {
-      const text = document.getElementById('inputText').value;
+      const text = inputTextElement.value;
       if (!text) {
-        document.getElementById('hashOutput').textContent = 'Please enter some text.';
+        showMessage('Please enter some text or drop a file.', 'error');
         return;
       }
 
+      // Show hashing initiation message briefly
+      showMessage(`Generating ${currentAlgorithm} hash...`, 'info');
+      progressContainer.classList.remove('hidden');
+      progressBar.style.width = '50%'; // Indicate activity
+      progressText.textContent = 'Processing text...';
+
+
       try {
-        // Encode text as UTF-8
         const encoder = new TextEncoder();
         const data = encoder.encode(text);
+        
+        // Simulate a slight delay for text hashing to show progress
+        await new Promise(resolve => setTimeout(resolve, 50)); 
 
-        // Generate hash using selected algorithm
         const hashBuffer = await crypto.subtle.digest(currentAlgorithm, data);
-
-        // Convert ArrayBuffer to hex string
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        // Display the result with animation
-        const output = document.getElementById('hashOutput');
-        output.style.opacity = '0';
+        
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Hash generated!';
+        
         setTimeout(() => {
-          output.textContent = hashHex;
-          output.style.opacity = '1';
-        }, 200);
+            showMessage(hashHex, 'hash');
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+        }, 300);
+
       } catch (error) {
-        document.getElementById('hashOutput').textContent = 'Error: ' + error.message;
+        console.error('Hashing error:', error);
+        showMessage('Error: ' + error.message, 'error');
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
       }
     }
 
-    // Add keyboard shortcut listener
-    document.getElementById('inputText').addEventListener('keydown', function(e) {
+    // Add keyboard shortcut listener for text input
+    inputTextElement.addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault(); // Prevent newline in textarea
         generateHash();
       }
     });
 
     // Drag and drop functionality
-    const dropZone = document.getElementById('dropZone');
-    let isDraggingOver = false;
-
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, preventDefaults, false);
-      document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
     function preventDefaults(e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    // Handle drag enter and leave
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.body.addEventListener(eventName, preventDefaults, false); // Prevent browser default for file drop
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function highlight(e) {
+      dropZone.classList.add('border-primary', 'scale-105', 'shadow-xl'); // Enhanced highlight
+      dropZone.classList.remove('border-neutral-700/50');
+    }
+
+    function unhighlight(e) {
+      dropZone.classList.remove('border-primary', 'scale-105', 'shadow-xl');
+      dropZone.classList.add('border-neutral-700/50');
+    }
+
     ['dragenter', 'dragover'].forEach(eventName => {
       dropZone.addEventListener(eventName, highlight, false);
     });
@@ -339,105 +343,90 @@
       dropZone.addEventListener(eventName, unhighlight, false);
     });
 
-    function highlight(e) {
-      dropZone.classList.add('drag-over');
-    }
-
-    function unhighlight(e) {
-      dropZone.classList.remove('drag-over');
-    }
-
     // Handle dropped files
-    dropZone.addEventListener('drop', handleDrop, false);
-
-    async function handleDrop(e) {
+    dropZone.addEventListener('drop', async function handleDrop(e) {
       const dt = e.dataTransfer;
       const files = dt.files;
 
       if (files.length > 0) {
         const file = files[0];
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const output = document.getElementById('hashOutput');
-
-        // Show progress elements
-        progressContainer.style.display = 'block';
-        progressText.style.display = 'block';
-        output.style.opacity = '0';
+        
+        inputTextElement.value = ''; // Clear text input
+        inputTextElement.placeholder = `Processing file: ${file.name}...`;
+        
+        progressContainer.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = `Preparing to hash ${file.name}...`;
+        showMessage(`Hashing ${file.name}...`, 'info');
 
         try {
-          const hash = await hashFile(file, (progress) => {
-            const percent = Math.round(progress * 100);
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `Hashing: ${percent}%`;
+          // Simplified hashFile: Reads entire file with progress, then hashes.
+          // This is more robust for crypto.subtle than complex chunking logic without external libs.
+          const hashHex = await hashFileWithProgress(file, (progress, stage) => {
+            progressBar.style.width = `${Math.round(progress * 100)}%`;
+            if (stage === 'reading') {
+              progressText.textContent = `Reading file: ${Math.round(progress * 100)}%`;
+            } else if (stage === 'hashing') {
+              progressText.textContent = `Finalizing hash...`;
+            }
           });
-
-          // Hide progress elements
-          progressContainer.style.display = 'none';
-          progressText.style.display = 'none';
           
-          // Show result
-          output.textContent = hash;
-          output.style.opacity = '1';
+          showMessage(hashHex, 'hash');
+          progressText.textContent = 'File hash generated!';
+
         } catch (error) {
-          output.textContent = 'Error: ' + error.message;
-          output.style.opacity = '1';
-          progressContainer.style.display = 'none';
-          progressText.style.display = 'none';
+          console.error('File hashing error:', error);
+          showMessage('Error: ' + error.message, 'error');
+          progressText.textContent = 'Error during hashing.';
+        } finally {
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+                progressBar.style.width = '0%';
+                inputTextElement.placeholder = "Type text or drop a file here...";
+            }, 1000); // Keep progress visible for a moment
         }
       }
-    }
+    }, false);
 
-    async function hashFile(file, progressCallback) {
-      const chunkSize = 1024 * 1024; // 1MB chunks
-      const chunks = Math.ceil(file.size / chunkSize);
-      let processed = 0;
-      
-      try {
-        const hashBuffer = await crypto.subtle.digest(currentAlgorithm, new Uint8Array(0));
-        let hashArray = new Uint8Array(hashBuffer);
-
-        for (let i = 0; i < chunks; i++) {
-          const start = i * chunkSize;
-          const end = Math.min(start + chunkSize, file.size);
-          const chunk = file.slice(start, end);
-          
-          const arrayBuffer = await readChunk(chunk);
-          const newHashBuffer = await crypto.subtle.digest(currentAlgorithm, arrayBuffer);
-          const newHashArray = new Uint8Array(newHashBuffer);
-          
-          // Combine hashes
-          hashArray = combineHashes(hashArray, newHashArray);
-          
-          processed++;
-          progressCallback(processed / chunks);
-        }
-
-        return Array.from(hashArray)
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-      } catch (error) {
-        throw new Error('Failed to generate hash: ' + error.message);
-      }
-    }
-
-    function readChunk(chunk) {
+    // Function to hash file content with progress updates for reading
+    function hashFileWithProgress(file, progressCallback) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (e) => reject(e);
-        reader.readAsArrayBuffer(chunk);
+
+        reader.onloadstart = () => {
+          progressCallback(0, 'reading');
+        };
+
+        reader.onprogress = (event) => {
+          if (event.lengthComputable) {
+            progressCallback(event.loaded / event.total, 'reading');
+          }
+        };
+
+        reader.onload = async (e) => {
+          try {
+            progressCallback(1, 'hashing'); // Indicate hashing stage
+            const fileData = e.target.result;
+            const hashBuffer = await crypto.subtle.digest(currentAlgorithm, fileData);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            resolve(hashHex);
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error('File reading error: ' + reader.error?.message));
+        };
+
+        reader.readAsArrayBuffer(file);
       });
     }
 
-    function combineHashes(hash1, hash2) {
-      const combined = new Uint8Array(hash1.length);
-      for (let i = 0; i < hash1.length; i++) {
-        combined[i] = hash1[i] ^ hash2[i];
-      }
-      return combined;
-    }
+    // Set initial message
+    showMessage('Your hash will appear here...', 'info');
+
   </script>
 </body>
 </html>
