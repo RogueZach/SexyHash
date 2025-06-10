@@ -8,6 +8,8 @@ Hashing solution, but *sexier*
 
 
 ### To Do
+    - Add option for key stretching
+        - Wherein user can hash a hash, and so forth
     - Add more hashing features
     - Improve UI
     - Add loading bar for large files
